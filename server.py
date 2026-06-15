@@ -16,6 +16,7 @@ from datetime import date, timedelta
 
 import garth
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, PlainTextResponse
 
@@ -42,7 +43,14 @@ def _today() -> str:
 
 
 # ── MCP server + tools ──
-mcp = FastMCP("Garmin Connect", stateless_http=True)
+# DNS-rebinding protection is disabled because the server runs behind a hosting
+# proxy (the public Host header is not localhost). Access is still gated by the
+# MCP_SECRET access key in AuthMiddleware below.
+mcp = FastMCP(
+    "Garmin Connect",
+    stateless_http=True,
+    transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
+)
 
 
 @mcp.tool()
